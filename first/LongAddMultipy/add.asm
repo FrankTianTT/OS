@@ -30,13 +30,15 @@ section .data
     negative_signal :   equ  `-`
 
 section .bss
-    x_num_str       :   resb 20
-    y_num_str       :   resb 20
+    x_num_str       :   resb 21
+    y_num_str       :   resb 21
     x_num_s         :   resb 1          ; 0是正的，1是负的
     y_num_s         :   resb 1
     x_num_len       :   resb 1
     y_num_len       :   resb 1
     char_input      :   resb 1
+    byte_output    :   resb 1
+    now_loc  : 	resq 1
 
 section .text
 
@@ -46,88 +48,47 @@ _main:
     mov rdx,    query_strlen
     call write
     
+    mov rsi, x_num_str
+    mov rdx, 21    
+    call read
+    
+    mov rsi, y_num_str
+    mov rdx, 21    
+    call read
 
-    ; 读取第一个数字
-    mov r8,     x_num_str
-    mov r9,     x_num_s
-    call        scan_20bits
-    call        exit
+    mov rsi, x_num_str
+    mov rdx, 21    
+    call write
+    
+    mov rsi, y_num_str
+    mov rdx, 21    
+    call write
+
+    jmp exit
 
 
-    ; 读取第二个数字
-    mov r8,     y_num_str
-    mov r9,     y_num_s
-    call        scan_20bits
-    call        exit
-
-    mov r8,     r8
-    mov r9,     20
-    call        write
-    call        exit
-
-; 将num首地址存入r8, 符号存入r9, r10保存位数, char_input读数
-scan_20bits:
-    pusha
-    mov r10,    0
-    mov rsi,    char_input
-    mov rdi,    1
-    call        read
-    mov r12b,   [char_input]
-    cmp r12b,   negative_signal
-    jz  if_negative
-    jnz if_positive
-    inc r10
-    call scan_loop
-    popa
-    ret
-
-if_negative:
-    mov [r9],   long 1
-    mov rsi,    char_input
-    mov rdi,    1
-    call        read
-    mov r12,    [char_input]
-    mov [r8],   r12
-    ret
-
-if_positive:
-    mov [r9],   long 0
-    mov r12,    [char_input]
-    mov [r8],   r12
-    ret
-
-scan_loop:
-    cmp r10,    20
-    jz  close_scan_loop
-    mov rsi,    char_input
-    mov rdi,    1
-    call        read
-    mov r12,    [char_input+r10]
-    mov [r8],   r12
-    inc r10
-    call scan_loop
-close_scan_loop:
-    ret
 
 ; 将字符地址存入rsi, 字符长度存入drx后调用
 write:
-    pusha
-    mov rax,    0x2000004                               ; 系统调用号
+    push rcx
+    mov rax,    1                               ; 系统调用号
     mov rdi,    1                                       ; 表示stdout
     syscall                                             ; 系统调用
-    popa
+    pop rcx
     ret
 
 ; 将字符地址存入rsi, 字符长度存入drx后调用
 read:
-    pusha
-    mov rax,    0x2000003                               ; 系统调用号
-    mov rdi,    0                                       ; 表示stdin
+    push rcx
+    mov rax,  	0                               ; 系统调用号
+    mov rdi, 	0                                       ; 表示stdin
     syscall                                             ; 系统调用
-    popa
+    pop rcx
     ret
 
 exit:
-    mov rax,    0x2000001                               ; 系统调用号
+    mov rax,    1                               ; 系统调用号
     syscall
-    ret
+    
+b:	
+	ret
