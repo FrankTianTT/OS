@@ -37,12 +37,10 @@ _main:
     mov r9,     x_num_s
     mov r12, 	x_num_len
     call        scan
-    
     mov r8,     x_num_str
     mov r9,     x_num_len
     call        leading_zero
     mov r8,     x_num_str
-    mov r9,     num_max_len
     call        print_num
     ; 读取第二个数字
     mov r8,     y_num_str
@@ -53,7 +51,6 @@ _main:
     mov r9,     y_num_len
     call        leading_zero
     mov r8,     y_num_str
-    mov r9,     num_max_len
     call        print_num
     
     ; 将两个数相加
@@ -188,13 +185,15 @@ back_bigadd_loop:
 ;-----------------------------------------------------------;
 ; 过程print_num, 输出数字(不含前导零)
 ; parameter reg ; r8 str first addr                         ;
-;               ; r9 num len(a num, not an addr)            ;
 ; use reg       ; r10 now bit                               ;
 ;               ; r11                                       ;
 ;               ; r12 num of the first none zero bit        ;
 ; use momery    ; return_signal                             ;
-;               ; r11                                       ;
 print_num:
+    push r10
+    push r11
+    push r12
+    push rcx
     mov r12,    long 0
     mov rcx,    long num_max_len
 print_num_loop:
@@ -210,14 +209,33 @@ print_num_loop:
     mov r12,    r10
 back_print_num_loop:
     loop        print_num_loop
+    ; following code deal with all zero
+    cmp r12,    0
+    jnz         print_ascii_num
+    mov r11b,   byte [r8+num_max_len-1]
+    cmp r11b,   byte 0
+    jz          print_zero
+    jnz         print_ascii_num
+print_ascii_num: 
     mov rsi,    print_num_str
     add rsi,    r12
-    mov rdx,    r9
+    mov rdx,    long num_max_len
     sub rdx,    r12
     call        write
+    jmp         exit_print_num
+print_zero:
+    mov [char_output],  byte 48
+    mov rsi,    char_output
+    mov rdx,    long 1
+    call        write
+exit_print_num:
     mov rsi,    return_signal
     mov rdx,    long 1
     call        write
+    pop rcx
+    pop r12
+    pop r11
+    pop r10
     ret
 
 
