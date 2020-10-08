@@ -20,9 +20,7 @@ section .bss
     y_num_s         :   resb 1
     x_num_len       :   resb 1
     y_num_len       :   resb 1
-    r_num_str	    :   resb num_max_len
-    r_num_s		    :   resb 1
-    r_num_len		:   resb 1
+    add_result_str	:   resb num_max_len
     char_input      :   resb 1
     char_output     :   resb 1
 
@@ -39,6 +37,7 @@ _main:
     mov r9,     x_num_s
     mov r12, 	x_num_len
     call        scan
+    
     mov r8,     x_num_str
     mov r9,     x_num_len
     call        leading_zero
@@ -60,25 +59,27 @@ _main:
     ; 将两个数相加
     mov r8,     x_num_str
     mov r9,     y_num_str
-    mov r13,    r_num_str
+    mov r13,    add_result_str
     call        bigadd
     
     ; 输出结果
-    mov r8,     r_num_str
+    mov r8,     add_result_str
     mov r9,     num_max_len
     call        print_num
     
     ; 结束程序
     jmp        exit
-;--------------------------------------------------------;
-; 过程scan，用于扫描一个最多为40位的整数
-; parameter reg ; r8 str first addr
-;               ; r9 num signal save addr
-;               ; r12 num len save addr
-; use reg       ; r10, r11, r12
-; use memory    ; char_input
-;               ; negative_signal
-;               ; return_signal
+    
+    
+;-----------------------------------------------------------;
+; 过程scan，用于扫描一个最多为40位的整数                      
+; parameter reg ; r8 str first addr                         ;
+;               ; r9 num signal save addr                   ;
+;               ; r12 num len save addr                     ;
+; use reg       ; r10, r11, r12                             ;
+; use memory    ; char_input                                ;
+;               ; negative_signal                           ;
+;               ; return_signal                             ;
 scan:
     mov rsi,    char_input
     mov rdx,    1
@@ -121,18 +122,18 @@ if_negative:
 if_positive:
     mov [r9],   byte 0
     jmp         back_scan
-;--------------------------------------------------------;
 
-;--------------------------------------------------------;
+
+;-----------------------------------------------------------;
 ; 过程leading_zero, 用来给扫描到到数字补零
-; parameter reg ; r8 str first addr
-;               ; r9 num len save addr
-; use reg       ; r10 num of mov bits
-;               ; r11 now bit
+; parameter reg ; r8 str first addr                         ;
+;               ; r9 num len save addr                      ;
+; use reg       ; r10 num of mov bits                       ;
+;               ; r11 now bit                               ;
 leading_zero:
     mov r10b,   num_max_len
     sub r10b,   byte [r9]
-    mov cl,     byte [  r9]
+    mov cl,     byte [r9]
 mov_bits_loop:
     mov r11,    r8
     add r11,    rcx
@@ -140,7 +141,7 @@ mov_bits_loop:
     mov r12b,   byte [r11]
     mov [r11+r10],  r12b
     loop        mov_bits_loop
-    mov cl,     10b
+    mov cl,     r10b
 add_zeros_loop:
     mov r11,    r8
     add r11,    rcx
@@ -148,18 +149,18 @@ add_zeros_loop:
     mov [r11],  byte 0
     loop        add_zeros_loop
     ret
-;--------------------------------------------------------;
 
-;--------------------------------------------------------;
+
+;-----------------------------------------------------------;
 ; 过程bigadd, 用来大数相加
-; parameter reg ; r8 first str first addr
-;               ; r8 second str first addr
-;               ; r13 result str first addr
-; use reg       ; r10 num of now adding bit
-;               ; r11 now adding bit of first num
-;               ; r12 now adding bit of second num
-;               ; r13
-;               ; r14 carray bit
+; parameter reg ; r8 first str first addr                   ;
+;               ; r8 second str first addr                  ;
+;               ; r13 result str first addr                 ;
+; use reg       ; r10 num of now adding bit                 ;
+;               ; r11 now adding bit of first num           ;
+;               ; r12 now adding bit of second num          ;
+;               ; r13                                       ;
+;               ; r14 carray bit                            ;
 bigadd:
     mov rcx,    num_max_len
     mov r14,    long 0
@@ -182,17 +183,17 @@ back_bigadd_loop:
     mov [r10],  r11b
     loop        bigadd_loop
     ret
-;--------------------------------------------------------;
 
-;--------------------------------------------------------;
+
+;-----------------------------------------------------------;
 ; 过程print_num, 输出数字(不含前导零)
-; parameter reg ; r8 str first addr
-;               ; r9 num len(a num, not an addr)
-; use reg       ; r10 now bit
-;               ; r11
-;               ; r12 num of the first none zero bit
-; use momery    ; return_signal
-;               ; r11
+; parameter reg ; r8 str first addr                         ;
+;               ; r9 num len(a num, not an addr)            ;
+; use reg       ; r10 now bit                               ;
+;               ; r11                                       ;
+;               ; r12 num of the first none zero bit        ;
+; use momery    ; return_signal                             ;
+;               ; r11                                       ;
 print_num:
     mov r12,    long 0
     mov rcx,    long num_max_len
@@ -218,9 +219,9 @@ back_print_num_loop:
     mov rdx,    long 1
     call        write
     ret
-;--------------------------------------------------------;
 
-;--------------------------------------------------------;
+
+;-----------------------------------------------------------;
 ; 过程write
 write:
     push rcx
@@ -229,9 +230,9 @@ write:
     syscall                                             ; 系统调用
     pop rcx
     ret
-;--------------------------------------------------------;
 
-;--------------------------------------------------------;
+
+;-----------------------------------------------------------;
 ; 过程read
 read:
     push rcx
@@ -240,15 +241,15 @@ read:
     syscall                                             ; 系统调用
     pop rcx
     ret
-;--------------------------------------------------------;
 
-;--------------------------------------------------------;
+
+;-----------------------------------------------------------;
 exit:
     mov rax,    60                               ; 系统调用号
     xor rdi, rdi
     syscall
-;--------------------------------------------------------;
 
 
+;-----------------------------------------------------------;
 b:
     ret
