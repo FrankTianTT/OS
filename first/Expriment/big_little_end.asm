@@ -4,4 +4,8 @@ section .data
 
 section .text
 _main:
+    mov rax,    number
+    call b
     
+b:
+    mov rax,    number
