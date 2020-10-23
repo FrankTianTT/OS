@@ -45,6 +45,10 @@ struct Node{
     long offset;
 };
 
+extern "C" {
+	void asm_print(const char *, const int);
+}
+
 
 int NumBytesPerSector;
 int NumSectorsPerCluster;
@@ -61,6 +65,8 @@ void lsNormal(Node* nodePointer);
 void lsL(Node* nodePointer);
 Node* SearchDirNode(string dirName, Node* nodePointer);
 Node* SearchFileNode(string fileName, Node* nodePointer);
+void cpp_print(const char * s);
+
 int main(){
 	FILE* imgFile;
 	imgFile = fopen("a.img", "rb");	//打开FAT12的映像文件
@@ -85,7 +91,7 @@ int main(){
     LoadingRootDir(imgFile, &rootNode, &dirEntry);
 
     while(true){
-        cout<<"> ";
+        cpp_print("> ");
         string input;
         getline(cin, input);
         if(input == "exit") break;
@@ -99,13 +105,6 @@ void LoadingF12BPB(FILE* imgFilePointer, F12BPB* BPBPointer){
     fread(BPBPointer, 1, 25, imgFilePointer);
 }
 
-void printDirEntry(DirEntry* dirEntryPointer){
-    cout<<"Name\t\t"<<dirEntryPointer->fileName<<endl;
-	cout<<"Attributes\t"<<dirEntryPointer->fileAttributes<<endl;
-	cout<<"FirstCluster\t"<<dirEntryPointer->fileFirstCluster<<endl;
-	cout<<"Size\t\t"<<dirEntryPointer->fileSize<<endl;
-    cout<<endl;
-}
 bool checkIsName(char* dirName){
     for(int i=0;i<11;i++){
         char c = dirName[i];
@@ -230,17 +229,6 @@ void LoadingRootDir(FILE* imgFilePointer, Node* rootNodePointer, DirEntry* dirEn
     rootNodePointer->isRootDir = true;
 }
 
-void PrintF12BPB(){
-    cout<<"NumBytesPerSector"<<(int)NumBytesPerSector<<endl;
-    cout<<"NumSectorsPerCluster"<<(int)NumSectorsPerCluster<<endl;
-    cout<<"NumReservedSectors"<<(int)NumReservedSectors<<endl;
-    cout<<"NumFATs"<<(int)NumFATs<<endl;
-    cout<<"NumRootDirectoryEntries"<<(int)NumRootDirectoryEntries<<endl;
-    cout<<"NumTotalSectors"<<(int)NumTotalSectors<<endl;
-    cout<<"NumSectorsPerFAT"<<(int)NumSectorsPerFAT<<endl;
-    return;
-}
-
 void dealInput(string input, Node* rootNodePointer){                       //有限状态机
 // 有限状态机的状态有：
 //0: 期待读入一条指令
@@ -259,7 +247,7 @@ void dealInput(string input, Node* rootNodePointer){                       //有
         }
         else if(input[inputCharPointer] == 'l'){         //期待's'
             if(state != 0){
-                cout<<"指令重复！"<<endl;
+                cpp_print("指令重复！\n");
                 return;
             }
             inputCharPointer ++;
@@ -267,13 +255,13 @@ void dealInput(string input, Node* rootNodePointer){                       //有
                 state = 2;
             }
             else{
-                cout<<"无法识别的指令，你是想输入‘ls’吗？"<<endl;
+                cpp_print("无法识别的指令，你是想输入‘ls’吗？\n");
                 return;
             }
         }
         else if(input[inputCharPointer] == 'c'){         //期待'a'
             if(state != 0){
-                cout<<"指令重复！"<<endl;
+                cpp_print("指令重复！\n");
                 return;
             }
             inputCharPointer ++;
@@ -283,22 +271,22 @@ void dealInput(string input, Node* rootNodePointer){                       //有
                     state = 1;
                 }
                 else{
-                    cout<<"无法识别的指令，你是想输入‘cat’吗？"<<endl;
+                    cpp_print("无法识别的指令，你是想输入‘cat’吗？\n");
                     return;
                 }
             }
             else{
-                cout<<"无法识别的指令，你是想输入‘cat’吗？"<<endl;
+                cpp_print("无法识别的指令，你是想输入‘cat’吗？\n");
                 return;
             }
         }
         else if(input[inputCharPointer] == '-'){
             if(state == 1){
-                cout<<"cat指令不支持参数！"<<endl;
+                cpp_print("cat指令不支持参数！\n");
                 return;
             }
             else if(state == 0){
-                cout<<"请先输入一条指令！"<<endl;
+                cpp_print("请先输入一条指令！\n");
                 return;
             }
             else{
@@ -315,24 +303,24 @@ void dealInput(string input, Node* rootNodePointer){                       //有
                             break;
                         }
                         else{
-                            cout<<"无效的参数！"<<endl;
+                            cpp_print("无效的参数！\n");
                             return;
                         }
                     }
                 }
                 else{
-                    cout<<"只支持-l参数！"<<endl;
+                    cpp_print("只支持-l参数！\n");
                     return;
                 }
             }
         }
         else{
             if (state == 0){
-                cout<<"不存在的指令"<<endl;
+                cpp_print("不存在的指令\n");
                 return;
             }
             if (state == 3){
-                cout<<"不再接受一个文件夹！"<<endl;
+                cpp_print("不再接受一个文件夹！\n");
                 return;
             }
             while(true){
@@ -347,7 +335,7 @@ void dealInput(string input, Node* rootNodePointer){                       //有
                     break;
                 }
                 else{
-                    cout<<"无效的路径名！"<<endl;
+                    cpp_print("无效的路径名！\n");
                     return;
                 }
             }
@@ -359,7 +347,7 @@ void dealInput(string input, Node* rootNodePointer){                       //有
 
     if (state == 0) return;
     else if(state == 1){
-        cout<<"请输入文件名！"<<endl;
+        cpp_print("请输入文件名！\n");
         return;
     }
     else if(state == 2){
@@ -369,7 +357,7 @@ void dealInput(string input, Node* rootNodePointer){                       //有
     else if(state == 3){
         Node* lsNode = SearchDirNode(dirName, rootNodePointer);
         if(lsNode == NULL){
-            cout<<"您输入的目录不存在！"<<endl;
+            cpp_print("您输入的目录不存在！\n");
             return;
         }
         if(ifParamL) lsL(lsNode);
@@ -378,40 +366,47 @@ void dealInput(string input, Node* rootNodePointer){                       //有
     else if(state == 4){
         Node* catNode = SearchFileNode(dirName, rootNodePointer);
         if(catNode == NULL){
-            cout<<"您输入的文件不存在！"<<endl;
+            cpp_print("您输入的文件不存在！\n");
             return;
         }
-        cout<<catNode->content<<endl;
+        cpp_print(catNode->content);
     }
     return;
 }
 
 void lsNormal(Node* nodePointer){
-    cout<<nodePointer->printPath<<":"<<endl;
+    string strPrint = "";
+    strPrint = nodePointer->printPath + ":\n";
+    cpp_print(strPrint.c_str());
     Node* nowNodePointer = nodePointer->child;
     if(!nodePointer->isRootDir){
-        cout<<"\033[31m"<<".  .."<<"\033[0m";
+        strPrint = "\033[31m.  ..\033[0m";
+        cpp_print(strPrint.c_str());
     }
     else{
         if(nowNodePointer->isFile){
-                cout<<"\033[0m"<<nowNodePointer->name;
-            }
+            strPrint = "\033[0m"+nowNodePointer->name;
+            cpp_print(strPrint.c_str());
+        }
         else{
-            cout<<"\033[31m"<<nowNodePointer->name<<"\033[0m";
+            strPrint = "\033[31m"+nowNodePointer->name+"\033[0m";
+            cpp_print(strPrint.c_str());
         }
         nowNodePointer = nowNodePointer->next;
     }
 
     while(nowNodePointer!=NULL){
         if(nowNodePointer->isFile){
-            cout<<"\033[0m"<<"  "<<nowNodePointer->name;
+            strPrint = "\033[0m"+nowNodePointer->name;
+            cpp_print(strPrint.c_str());
         }
         else{
-            cout<<"\033[31m"<<"  "<<nowNodePointer->name<<"\033[0m";
+            strPrint = "\033[31m"+nowNodePointer->name+"\033[0m";
+            cpp_print(strPrint.c_str());
         }
         nowNodePointer = nowNodePointer->next;
     }
-    cout<<endl;
+    cpp_print("\n");
     nowNodePointer = nodePointer->child;
     while(nowNodePointer!=NULL){
         if(!nowNodePointer->isFile){
@@ -422,21 +417,26 @@ void lsNormal(Node* nodePointer){
 }
 
 void lsL(Node* nodePointer){
-    cout<<nodePointer->printPath<<" "<<nodePointer->dirCount<<" "<<nodePointer->fileCount<<":"<<endl;
+    string strPrint = "";
+    strPrint = nodePointer->printPath + " " + to_string(nodePointer->dirCount) + " " + to_string(nodePointer->fileCount) + ":\n";
+    cpp_print(strPrint.c_str());
     Node* nowNodePointer = nodePointer->child;
     if(!nodePointer->isRootDir){
-        cout<<"\033[31m"<<"."<<endl<<".."<<"\033[0m"<<endl;
+        strPrint = "\033[31m.\n..\033[0m\n";
+        cpp_print(strPrint.c_str());
     }
     while(nowNodePointer!=NULL){
         if(nowNodePointer->isFile){
-            cout<<"\033[0m"<<nowNodePointer->name<<"  "<<nowNodePointer->fileSize<<endl;
+            strPrint = "\033[0m" + nowNodePointer->name + " " + to_string(nowNodePointer->fileSize) + "\n";
+            cpp_print(strPrint.c_str());
         }
         else{
-            cout<<"\033[31m"<<nowNodePointer->name<<"\033[0m"<<"  "<<nowNodePointer->dirCount<<" "<<nowNodePointer->fileCount<<endl;
+            strPrint = "\033[31m" + nowNodePointer->name + "\033[0m " + to_string(nowNodePointer->dirCount) + " " + to_string(nowNodePointer->fileCount) + "\n";
+            cpp_print(strPrint.c_str());
         }
         nowNodePointer = nowNodePointer->next;
     }
-    cout<<endl;
+    cpp_print("\n");
     nowNodePointer = nodePointer->child;
     while(nowNodePointer!=NULL){
         if(!nowNodePointer->isFile){
@@ -479,4 +479,8 @@ Node* SearchFileNode(string fileName, Node* nodePointer){
         nowNodePointer = nowNodePointer->next;
     }
     return NULL;
+}
+
+void cpp_print(const char * s){
+    asm_print(s, strlen(s));
 }
