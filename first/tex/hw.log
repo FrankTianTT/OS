@@ -1,10 +1,10 @@
-This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020) (preloaded format=xelatex 2020.10.7)  8 OCT 2020 22:00
+This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020) (preloaded format=xelatex 2020.10.7)  9 OCT 2020 20:06
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/Users/frank/Documents/Git/OS/first/Tex/hw
-(/Users/frank/Documents/Git/OS/first/Tex/hw.tex
+**/Users/frank/Documents/Git/OS/First/Tex/hw
+(/Users/frank/Documents/Git/OS/First/Tex/hw.tex
 LaTeX2e <2020-02-02> patch level 5
 L3 programming layer <2020-03-06> (/usr/local/texlive/2020/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2019/12/20 v1.4l Standard LaTeX document class
@@ -360,7 +360,9 @@ File: terminal.png Graphic file (type bmp)
 ]
 File: add_mul_out.png Graphic file (type bmp)
 <add_mul_out.png>
- [2] [3] [4] [5] [6] (./hw.aux) ) 
+ [2] [3] [4] [5]
+Missing character: There is no 瑄 in font [FandolSong-Regular.otf]/OT:language=dflt;!
+ [6] (./hw.aux) ) 
 Here is how much of TeX's memory you used:
  8109 strings out of 479418
  220020 string characters out of 5884585
