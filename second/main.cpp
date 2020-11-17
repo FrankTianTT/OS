@@ -398,11 +398,11 @@ void lsNormal(Node* nodePointer){
 
     while(nowNodePointer!=NULL){
         if(nowNodePointer->isFile){
-            strPrint = "\033[0m"+nowNodePointer->name;
+            strPrint = "  \033[0m"+nowNodePointer->name;
             cpp_print(strPrint.c_str());
         }
         else{
-            strPrint = "\033[31m"+nowNodePointer->name+"\033[0m";
+            strPrint = "  \033[31m"+nowNodePointer->name+"\033[0m";
             cpp_print(strPrint.c_str());
         }
         nowNodePointer = nowNodePointer->next;
