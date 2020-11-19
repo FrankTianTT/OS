@@ -45,7 +45,7 @@ LABEL_START:
 	int	10h			; int 10h
 
 	mov	dh, 0			; "Booting  "
-	call	DispStr			; 显示字符串
+	; call	DispStr			; 显示字符串
 	
 	xor	ah, ah	; ┓
 	xor	dl, dl	; ┣ 软驱复位
@@ -98,7 +98,7 @@ LABEL_GOTO_NEXT_SECTOR_IN_ROOT_DIR:
 
 LABEL_NO_LOADERBIN:
 	mov	dh, 2			; "No LOADER."
-	call	DispStr			; 显示字符串
+	; call	DispStr			; 显示字符串
 %ifdef	_BOOT_DEBUG_
 	mov	ax, 4c00h		; ┓
 	int	21h			; ┛没有找到 LOADER.BIN, 回到 DOS
@@ -144,7 +144,7 @@ LABEL_GOON_LOADING_FILE:
 LABEL_FILE_LOADED:
 
 	mov	dh, 1			; "Ready."
-	call	DispStr			; 显示字符串
+	; call	DispStr			; 显示字符串
 
 ; *****************************************************************************************************
 	jmp	BaseOfLoader:OffsetOfLoader	; 这一句正式跳转到已加载到内存中的 LOADER.BIN 的开始处

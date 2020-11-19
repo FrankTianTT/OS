@@ -22,6 +22,9 @@
 #include "keyboard.h"
 #include "proto.h"
 
+char tab_array[2730] = {'0'};
+
+
 PRIVATE void set_cursor(unsigned int position);
 PRIVATE void set_video_start_addr(u32 addr);
 PRIVATE void flush(CONSOLE* p_con);
@@ -50,8 +53,8 @@ PUBLIC void init_screen(TTY* p_tty)
 		disp_pos = 0;
 	}
 	else {
-		out_char(p_tty->p_console, nr_tty + '0');
-		out_char(p_tty->p_console, '#');
+		out_char(p_tty->p_console, nr_tty + '0', 0);
+		out_char(p_tty->p_console, '#', 0);
 	}
 
 	set_cursor(p_tty->p_console->cursor);
@@ -68,10 +71,73 @@ PUBLIC int is_current_console(CONSOLE* p_con)
 
 
 /*======================================================================*
+			   console_clear
+ *======================================================================*/
+PUBLIC void console_clear(CONSOLE* p_con){
+	for(int i = 0; i < p_con->v_mem_limit;i++){
+		*(u8*)(V_MEM_BASE + p_con->original_addr + i * 2) = ' ';
+		*(u8*)(V_MEM_BASE + p_con->original_addr + i * 2  + 1) = DEFAULT_CHAR_COLOR;
+	}
+	p_con->cursor = p_con->original_addr;
+	flush(p_con);
+}
+
+PUBLIC void console_search_finish(CONSOLE* p_con, int search_length){
+	for(int i = 0; i<search_length;i++){
+		out_char(p_con, '\b', 0);
+	}
+	for(int i = 0; i < p_con->v_mem_limit;i++){
+		*(u8*)(V_MEM_BASE + p_con->original_addr + i * 2  + 1) = DEFAULT_CHAR_COLOR;
+	}
+	flush(p_con);
+}
+
+PUBLIC void show_search_result(CONSOLE* p_con, char* search_buffer, int search_length){
+	// for(int i = 0; i<search_length;i++){
+	// 	out_char(p_con, search_buffer[i], 1);
+	// }
+
+	int now_match_bit_of_str = 0; // the bit of search string
+	int now_match_bit_of_vm = 0; // the bit of visual memory
+	for(int i = 0; i < p_con->v_mem_limit; i ++){
+		if((char)*(u8*)(V_MEM_BASE + p_con->original_addr + i * 2) == search_buffer[now_match_bit_of_str]){
+			if(now_match_bit_of_str == 0){
+				now_match_bit_of_vm = i;
+				now_match_bit_of_str ++;
+			}
+			else{
+				if (now_match_bit_of_str == search_length - 1){
+					// search success!
+					now_match_bit_of_str = 0;
+					for(int j = 0; j < search_length; j ++){
+						*(u8*)(V_MEM_BASE + p_con->original_addr + (now_match_bit_of_vm  + j) * 2  + 1) = 0x0C;
+					}
+				}
+				else{
+					// search continue...
+					now_match_bit_of_str ++;
+				}
+			}
+
+		}
+		else{
+			// search fail!
+			if(now_match_bit_of_str != 0){
+				now_match_bit_of_str = 0;
+				i --;
+			}
+		}
+	}
+	flush(p_con);
+}
+
+/*======================================================================*
 			   out_char
  *======================================================================*/
-PUBLIC void out_char(CONSOLE* p_con, char ch)
-{
+PUBLIC void out_char(CONSOLE* p_con, char ch, int is_red){
+	char color = DEFAULT_CHAR_COLOR;
+	if (is_red) color = 0x0C;
+
 	u8* p_vmem = (u8*)(V_MEM_BASE + p_con->cursor * 2);
 
 	switch(ch) {
@@ -85,16 +151,40 @@ PUBLIC void out_char(CONSOLE* p_con, char ch)
 		break;
 	case '\b':
 		if (p_con->cursor > p_con->original_addr) {
-			p_con->cursor--;
-			*(p_vmem-2) = ' ';
-			*(p_vmem-1) = DEFAULT_CHAR_COLOR;
+			if(tab_array[p_con->cursor-1]=='1'){
+				for(int i=0;i<4;i++){
+					p_con->cursor--;
+					tab_array[p_con->cursor] = '0';
+					*(p_vmem-2) = ' ';
+					*(p_vmem-1) = color;
+				}
+			}
+			else{
+				p_con->cursor--;
+				*(p_vmem-2) = ' ';
+				*(p_vmem-1) = color;
+			}
+			
+
+		}
+		break;
+	case '\t':
+		if (p_con->cursor <
+		    p_con->original_addr + p_con->v_mem_limit - 4) {
+			for(int i=0;i<4;i++){
+				tab_array[p_con->cursor]='1';
+				*p_vmem++ = ' ';
+				*p_vmem++ = color;
+				p_con->cursor++;
+			}
+			
 		}
 		break;
 	default:
 		if (p_con->cursor <
 		    p_con->original_addr + p_con->v_mem_limit - 1) {
 			*p_vmem++ = ch;
-			*p_vmem++ = DEFAULT_CHAR_COLOR;
+			*p_vmem++ = color;
 			p_con->cursor++;
 		}
 		break;
