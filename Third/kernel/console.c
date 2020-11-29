@@ -104,7 +104,7 @@ PUBLIC void show_search_result(CONSOLE* p_con, char* search_buffer, int search_l
 	int now_match_bit_of_str = 0; // the bit of search string
 	int now_match_bit_of_vm = 0; // the bit of visual memory
 	for(int i = 0; i < search_cursor; i ++){
-		if((char)*(u8*)(V_MEM_BASE + p_con->original_addr + i * 2) == search_buffer[now_match_bit_of_str]){
+		if((char)*(u8*)(V_MEM_BASE + p_con->original_addr + i * 2) == search_buffer[now_match_bit_of_str] && tab_array[i] == tab_array[search_cursor + now_match_bit_of_str]){
 			if(now_match_bit_of_str == 0){
 				now_match_bit_of_vm = i;
 				now_match_bit_of_str ++;
@@ -145,7 +145,10 @@ PUBLIC void show_search_result(CONSOLE* p_con, char* search_buffer, int search_l
  *======================================================================*/
 PUBLIC void out_char(CONSOLE* p_con, char ch, int is_red){
 	char color = DEFAULT_CHAR_COLOR;
-	if (is_red) color = 0x0C;
+	if (is_red) {
+		if (ch == ' ' || ch == '\t' ) color = 0x40;
+		else color = 0x0C;
+	}
 
 	u8* p_vmem = (u8*)(V_MEM_BASE + p_con->cursor * 2);
 

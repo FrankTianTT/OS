@@ -57,7 +57,7 @@ PUBLIC void task_tty()
 			tty_do_read(p_tty);
 			tty_do_write(p_tty);
 		}
-		if (timer == 1000000 && search_state == 0){
+		if (timer == 2000000 && search_state == 0){
 			for (p_tty=TTY_FIRST;p_tty<TTY_END;p_tty++) {
 				tty_do_clear(p_tty);
 			}
@@ -122,6 +122,12 @@ PUBLIC void in_process(TTY* p_tty, u32 key){
 					put_key(p_tty, '\b');
 					break;
 				case TAB:
+					if (search_state == 1){
+						for(int j=0;j < 4;j ++){
+							search_buffer[search_ptr] = ' ';
+							search_ptr ++;
+						}	
+					}
 					put_key(p_tty, '\t');
 					break;
                 case UP:
