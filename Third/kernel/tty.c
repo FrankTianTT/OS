@@ -30,6 +30,7 @@ PRIVATE void put_key(TTY* p_tty, u32 key);
 int search_state = 0;
 char search_buffer[100];
 int search_ptr = 0;
+int search_cursor = 0;
 
 /*======================================================================*
                            task_tty
@@ -47,13 +48,16 @@ PUBLIC void task_tty()
 	long timer = 0;
 	search_state = 0;
 	search_ptr = 0;
+	for (p_tty=TTY_FIRST;p_tty<TTY_END;p_tty++) {
+		tty_do_clear(p_tty);
+	}
 	while (1) {
 		if (search_state == 0) timer ++;
 		for (p_tty=TTY_FIRST;p_tty<TTY_END;p_tty++) {
 			tty_do_read(p_tty);
 			tty_do_write(p_tty);
 		}
-		if (timer == 2000000 && search_state == 0){
+		if (timer == 1000000 && search_state == 0){
 			for (p_tty=TTY_FIRST;p_tty<TTY_END;p_tty++) {
 				tty_do_clear(p_tty);
 			}
@@ -92,7 +96,10 @@ PUBLIC void in_process(TTY* p_tty, u32 key){
             int raw_code = key & MASK_RAW;
         	switch(raw_code) {
 				case ESC:
-					if (search_state == 0) search_state = 1;
+					if (search_state == 0){
+						search_state = 1;
+						search_cursor = p_tty->p_console->cursor;
+					}
 					else{
 						search_state = 0;
 						tty_search_finish(p_tty);
@@ -200,7 +207,7 @@ PRIVATE void tty_search_finish(TTY* p_tty)
 PRIVATE void tty_do_search(TTY* p_tty)
 {
 	if (is_current_console(p_tty->p_console)) {
-		show_search_result(p_tty->p_console, search_buffer, search_ptr);
+		show_search_result(p_tty->p_console, search_buffer, search_ptr, search_cursor);
 	}
 }
 

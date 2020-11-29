@@ -44,7 +44,7 @@ PUBLIC void in_process(TTY* p_tty, u32 key);
 /* console.c */
 PUBLIC void out_char(CONSOLE* p_con, char ch, int is_red);
 PUBLIC void console_clear(CONSOLE* p_con);
-PUBLIC void show_search_result(CONSOLE* p_con, char* search_buffer, int search_length);
+PUBLIC void show_search_result(CONSOLE* p_con, char* search_buffer, int search_length, int search_cursor);
 PUBLIC void console_search_finish(CONSOLE* p_con, int search_length);
 PUBLIC void scroll_screen(CONSOLE* p_con, int direction);
 

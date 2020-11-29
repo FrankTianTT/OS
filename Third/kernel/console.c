@@ -22,7 +22,8 @@
 #include "keyboard.h"
 #include "proto.h"
 
-char tab_array[2730] = {'0'};
+#define TAB_ARRAY_SIZE 2731
+char tab_array[TAB_ARRAY_SIZE] = {'0'};
 
 
 PRIVATE void set_cursor(unsigned int position);
@@ -78,6 +79,9 @@ PUBLIC void console_clear(CONSOLE* p_con){
 		*(u8*)(V_MEM_BASE + p_con->original_addr + i * 2) = ' ';
 		*(u8*)(V_MEM_BASE + p_con->original_addr + i * 2  + 1) = DEFAULT_CHAR_COLOR;
 	}
+	for(int i=0;i<TAB_ARRAY_SIZE;i++){
+		tab_array[i] = '0';
+	}
 	p_con->cursor = p_con->original_addr;
 	flush(p_con);
 }
@@ -92,14 +96,14 @@ PUBLIC void console_search_finish(CONSOLE* p_con, int search_length){
 	flush(p_con);
 }
 
-PUBLIC void show_search_result(CONSOLE* p_con, char* search_buffer, int search_length){
+PUBLIC void show_search_result(CONSOLE* p_con, char* search_buffer, int search_length, int search_cursor){
 	// for(int i = 0; i<search_length;i++){
 	// 	out_char(p_con, search_buffer[i], 1);
 	// }
 
 	int now_match_bit_of_str = 0; // the bit of search string
 	int now_match_bit_of_vm = 0; // the bit of visual memory
-	for(int i = 0; i < p_con->v_mem_limit; i ++){
+	for(int i = 0; i < search_cursor; i ++){
 		if((char)*(u8*)(V_MEM_BASE + p_con->original_addr + i * 2) == search_buffer[now_match_bit_of_str]){
 			if(now_match_bit_of_str == 0){
 				now_match_bit_of_vm = i;
@@ -110,7 +114,12 @@ PUBLIC void show_search_result(CONSOLE* p_con, char* search_buffer, int search_l
 					// search success!
 					now_match_bit_of_str = 0;
 					for(int j = 0; j < search_length; j ++){
-						*(u8*)(V_MEM_BASE + p_con->original_addr + (now_match_bit_of_vm  + j) * 2  + 1) = 0x0C;
+						if(*(u8*)(V_MEM_BASE + p_con->original_addr + (now_match_bit_of_vm  + j) * 2) != ' '){
+							*(u8*)(V_MEM_BASE + p_con->original_addr + (now_match_bit_of_vm  + j) * 2  + 1) = 0x0C;
+						}
+						else{
+							*(u8*)(V_MEM_BASE + p_con->original_addr + (now_match_bit_of_vm  + j) * 2  + 1) = 0x40;
+						}
 					}
 				}
 				else{
